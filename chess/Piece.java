@@ -1,6 +1,7 @@
 package chess;
 
 import chess.ReturnPiece.*;
+import java.util.ArrayList;
 
 public abstract class Piece 
 {
@@ -15,12 +16,12 @@ public abstract class Piece
     }
     
     // returns locations the piece can move to (ex. "e4", "h6")
-    public abstract String[] valid_moves(Piece[][] board); 
+    public abstract ArrayList<String> valid_moves(Piece[][] board); 
 
     public void move(Piece[][] board, String newPos)
     {
-        int x = get_x(retpiece);
-        int y = get_y(retpiece);
+        int x = this.get_x();
+        int y = this.get_y();
 
         board[x][y] = null;
 
@@ -54,8 +55,8 @@ public abstract class Piece
                 break;
         }
 
-        x = get_x(retpiece);
-        y = get_y(retpiece);
+        x = this.get_x();
+        y = this.get_y();
 
         board[x][y] = this;
     }
@@ -71,13 +72,34 @@ public abstract class Piece
     }
 
     // get 2d-arr coordinates from retpiece
-    public static int get_x(ReturnPiece piece)
+    public int get_x()
     {
-        return 8 - piece.pieceRank;
+        return 8 - retpiece.pieceRank;
     }
 
-    public static int get_y(ReturnPiece piece)
+    public int get_y()
     {
-        return piece.pieceFile.ordinal();
+        return retpiece.pieceFile.ordinal();
+    }
+
+    public static PieceFile int_to_file(int x)
+    {
+        switch(x)
+        {
+            case 0: return PieceFile.a;
+            case 1: return PieceFile.b;
+            case 2: return PieceFile.c;
+            case 3: return PieceFile.d;
+            case 4: return PieceFile.e;
+            case 5: return PieceFile.f;
+            case 6: return PieceFile.g;
+            case 7: return PieceFile.h;
+            default: return null;
+        }
+    }
+
+    public static int int_to_rank(int x)
+    {
+        return 8 - x;
     }
 }
