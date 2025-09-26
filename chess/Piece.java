@@ -1,6 +1,7 @@
 package chess;
 
 import chess.ReturnPiece.*;
+import chess.Chess.Player;
 import java.util.ArrayList;
 
 public abstract class Piece 
@@ -18,6 +19,9 @@ public abstract class Piece
     // returns locations the piece can move to (ex. "e4", "h6")
     public abstract ArrayList<String> valid_moves(Piece[][] board); 
 
+
+
+    //Does NOT check if the move is valid
     public void move(Piece[][] board, String newPos)
     {
         int x = this.get_row();
@@ -71,6 +75,30 @@ public abstract class Piece
         return retpiece.pieceType;
     }
 
+    public Player get_color()
+    {
+        switch(retpiece.pieceType)
+        {
+            //WP, WR, WN, WB, WQ, WK,  BP, BR, BN, BB, BK, BQ
+            case WP:
+            case WR:
+            case WN:
+            case WB:
+            case WQ:
+            case WK:
+                return Player.white;
+            case BP:
+            case BR:
+            case BN:
+            case BB:
+            case BQ:
+            case BK:
+                return Player.black;
+            default:
+                return null;         
+        }
+    }
+
     // get 2d-arr coordinates from retpiece
     public int get_row()
     {
@@ -82,6 +110,7 @@ public abstract class Piece
         return retpiece.pieceFile.ordinal();
     }
 
+    //converts from coordinate to PieceFile/rank accordingly
     public static PieceFile int_to_file(int x)
     {
         switch(x)
