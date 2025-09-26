@@ -20,8 +20,8 @@ public abstract class Piece
 
     public void move(Piece[][] board, String newPos)
     {
-        int x = this.get_x();
-        int y = this.get_y();
+        int x = this.get_row();
+        int y = this.get_col();
 
         board[x][y] = null;
 
@@ -55,8 +55,8 @@ public abstract class Piece
                 break;
         }
 
-        x = this.get_x();
-        y = this.get_y();
+        x = this.get_row();
+        y = this.get_col();
 
         board[x][y] = this;
     }
@@ -72,12 +72,12 @@ public abstract class Piece
     }
 
     // get 2d-arr coordinates from retpiece
-    public int get_x()
+    public int get_row()
     {
         return 8 - retpiece.pieceRank;
     }
 
-    public int get_y()
+    public int get_col()
     {
         return retpiece.pieceFile.ordinal();
     }
