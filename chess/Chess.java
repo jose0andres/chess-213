@@ -4,10 +4,17 @@
 package chess;
 
 import java.util.ArrayList;
+import chess.ReturnPiece.*;
+import chess.Piece;
 
-public class Chess {
 
-        enum Player { white, black }
+public class Chess 
+{
+
+    enum Player { white, black }
+
+	private static Piece[][] board = new Piece[8][8];
+	private static Player currentPlayer;
     
 	/**
 	 * Plays the next move for whichever player has the turn.
@@ -20,7 +27,6 @@ public class Chess {
 	 */
 	public static ReturnPlay play(String move) // can assume move properly formatted, may have leading/trailing whitespace
 	{
-
 		/* FILL IN THIS METHOD */
 		
 		/* FOLLOWING LINE IS A PLACEHOLDER TO MAKE COMPILER HAPPY */
@@ -32,7 +38,17 @@ public class Chess {
 	/**
 	 * This method should reset the game, and start from scratch.
 	 */
-	public static void start() {
-		/* FILL IN THIS METHOD */
+	public static void start() 
+	{
+		currentPlayer = Player.white;
+
+		for(int r = 0; r < 8; r++)
+		{
+			for(int f = 0; f < 8; f++)
+			{
+				if(r == 1); // pawns
+				if(r > 1 && r < 7) board[r][f] = null;
+			}
+		}
 	}
 }
