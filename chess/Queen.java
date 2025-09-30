@@ -19,7 +19,7 @@ public class Queen extends Piece
         else return PieceType.WQ;
     }
 
-    public ArrayList<String> valid_moves(Piece[][] board)
+    public ArrayList<String> valid_moves(Piece[][] board) //TODO ensure king is not in check (make a valid_moves_check method which does not check for the king type thing)
     {
         int x = this.get_col(); //column, file
         int y = this.get_row(); //row, rank

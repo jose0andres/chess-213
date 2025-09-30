@@ -110,6 +110,16 @@ public abstract class Piece
         return retpiece.pieceFile.ordinal();
     }
 
+    public int get_rank()
+    {
+        return retpiece.pieceRank;
+    }
+
+    public PieceFile get_file()
+    {
+        return retpiece.pieceFile;
+    }
+
     //converts from coordinate to PieceFile/rank accordingly
     public static PieceFile int_to_file(int x)
     {
