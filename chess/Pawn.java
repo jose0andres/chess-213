@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import chess.ReturnPiece.*;
 import chess.Chess.Player;
 
-//TODO custom move method to handle - promotion AND double_moved AND en passant
-
 public class Pawn extends Piece 
 {
     private boolean moved = false;
