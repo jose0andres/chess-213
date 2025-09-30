@@ -24,8 +24,8 @@ public abstract class Piece
     //Does NOT check if the move is valid
     public void move(Piece[][] board, String newPos)
     {
-        int x = this.get_row();
-        int y = this.get_col();
+        int x = this.get_col();
+        int y = this.get_row();
 
         board[x][y] = null;
 
@@ -59,8 +59,8 @@ public abstract class Piece
                 break;
         }
 
-        x = this.get_row();
-        y = this.get_col();
+        x = this.get_col();
+        y = this.get_row();
 
         board[x][y] = this;
     }

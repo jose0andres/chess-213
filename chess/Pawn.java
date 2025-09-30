@@ -23,7 +23,6 @@ public class Pawn extends Piece
 
     public void move(Piece[][] board, String newPos)
     {
-
         int x = super.get_col(); //column, file
         int y = super.get_row(); //row, rank
 
@@ -31,13 +30,14 @@ public class Pawn extends Piece
         if(!moved) moved = true; 
 
         int newx = super.get_col();
+        int newy = super.get_row();
 
         int direction;
         if(this.get_color() == Player.black) direction = 1; // black
         else direction = -1; // white
 
         //if double move was made
-        if(Integer.parseInt(newPos.charAt(1) + "") == y + (2 * direction)) double_moved = true;
+        if(newy == y + (2 * direction)) double_moved = true;
         else double_moved = false;
 
         //if en passant was made
@@ -88,7 +88,7 @@ public class Pawn extends Piece
         {
             direction = -1;
 
-            if(y == 5) //en passant
+            if(y == 3) //en passant
             {
                 if(x - 1 >= 0 && board[x-1][y] != null && board[x-1][y].get_type() == PieceType.BP)
                 {
