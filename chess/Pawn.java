@@ -21,6 +21,7 @@ public class Pawn extends Piece
         else return PieceType.WP;
     }
 
+    @Override
     public void move(Piece[][] board, String newPos)
     {
         int x = super.get_col(); //column, file
