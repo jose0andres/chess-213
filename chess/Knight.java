@@ -40,14 +40,4 @@ public class Knight extends Piece {
 
         return moves;
     }
-
-    private boolean isWhite(ReturnPiece.PieceType t) {
-        return t == ReturnPiece.PieceType.WP || t == ReturnPiece.PieceType.WR ||
-               t == ReturnPiece.PieceType.WN || t == ReturnPiece.PieceType.WB ||
-               t == ReturnPiece.PieceType.WQ || t == ReturnPiece.PieceType.WK;
-    }
-
-    private String square(int col, int row) {
-        return String.valueOf(int_to_file(col)) + int_to_rank(row);
-    }
 }
