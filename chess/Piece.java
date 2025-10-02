@@ -18,9 +18,14 @@ public abstract class Piece
     
     // returns locations the piece can move to (ex. "e4", "h6")
     public abstract ArrayList<String> valid_moves(Piece[][] board); 
+    public abstract ArrayList<String> valid_moves_no_test(Piece[][] board);
 
-    //tests each item in moves to see if it doesn't cause check, removes invalid moves from moves
-    public abstract void test_moves(Piece[][] board, ArrayList<String> moves);
+    //returns true if the move is valid (does not cause check)
+    //returns false if the move is invalid (does cause check
+    public boolean test_move(Piece[][] board, String move)
+    {
+        return false; // to be implemented by Jose
+    }
 
     //Does NOT check if the move is valid
     public void move(Piece[][] board, String newPos)
@@ -141,5 +146,33 @@ public abstract class Piece
     public static int int_to_rank(int x)
     {
         return 8 - x;
+    }
+
+
+    protected void scanRay(Piece[][] board, int r, int c, int dr, int dc, ArrayList<String> out) {
+    boolean meIsWhite = isWhite(this.retpiece.pieceType);
+    int nr = r + dr, nc = c + dc;
+
+    while (0 <= nr && nr < 8 && 0 <= nc && nc < 8) {
+        Piece at = board[nr][nc];
+        if (at == null) {
+            out.add(square(nc, nr));
+        } else {
+            boolean themIsWhite = isWhite(at.retpiece.pieceType);
+            if (themIsWhite != meIsWhite) out.add(square(nc, nr));
+            break; // blocked either way
+        }
+        nr += dr; nc += dc;
+    }
+}
+
+    protected boolean isWhite(ReturnPiece.PieceType t) {
+        return t == ReturnPiece.PieceType.WP || t == ReturnPiece.PieceType.WR ||
+               t == ReturnPiece.PieceType.WN || t == ReturnPiece.PieceType.WB ||
+               t == ReturnPiece.PieceType.WQ || t == ReturnPiece.PieceType.WK;
+    }
+
+    protected String square(int col, int row) {
+        return String.valueOf(int_to_file(col)) + int_to_rank(row);
     }
 }

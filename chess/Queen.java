@@ -19,6 +19,7 @@ public class Queen extends Piece
         else return PieceType.WQ;
     }
 
+    /*
     public ArrayList<String> valid_moves(Piece[][] board) 
     {
         int x = this.get_col(); //column, file
@@ -126,7 +127,70 @@ public class Queen extends Piece
             }
         }
 
+        for(int i = 0; i < arr.size(); i++)
+        {
+            if(!this.test_move(board, arr.get(i))) 
+            {
+                arr.remove(i);
+                i--;
+            }
+        }
+
+        return arr;
+    }
+    */
+
+    public ArrayList<String> valid_moves(Piece[][] board) 
+    {
+        int r = get_row(); 
+        int c = get_col(); 
+
+        ArrayList<String> arr = new ArrayList<String>();
+
+        // scan in 4 orthogonal directions
+        scanRay(board, r, c, +1,  0, arr); // down rows
+        scanRay(board, r, c, -1,  0, arr); // up rows
+        scanRay(board, r, c,  0, +1, arr); // right cols
+        scanRay(board, r, c,  0, -1, arr); // left cols
+
+        // scan in 4 diagonal directions
+        scanRay(board, r, c, +1,  +1, arr); // down, to right
+        scanRay(board, r, c, -1,  +1, arr); // up, to the right
+        scanRay(board, r, c,  +1, -1, arr); // down, to the left
+        scanRay(board, r, c,  -1, -1, arr); // up, to the left
+
+        for(int i = 0; i < arr.size(); i++)
+        {
+            if(!this.test_move(board, arr.get(i))) 
+            {
+                arr.remove(i);
+                i--;
+            }
+        }
+
         return arr;
     } 
 
+    @Override
+    public ArrayList<String> valid_moves_no_test(Piece[][] board) 
+    {
+        int r = get_row(); 
+        int c = get_col(); 
+
+        ArrayList<String> arr = new ArrayList<String>();
+
+        // scan in 4 orthogonal directions
+        scanRay(board, r, c, +1,  0, arr); // down rows
+        scanRay(board, r, c, -1,  0, arr); // up rows
+        scanRay(board, r, c,  0, +1, arr); // right cols
+        scanRay(board, r, c,  0, -1, arr); // left cols
+
+        // scan in 4 diagonal directions
+        scanRay(board, r, c, +1,  +1, arr); // down, to right
+        scanRay(board, r, c, -1,  +1, arr); // up, to the right
+        scanRay(board, r, c,  +1, -1, arr); // down, to the left
+        scanRay(board, r, c,  -1, -1, arr); // up, to the left
+
+        return arr;
+    } 
 }

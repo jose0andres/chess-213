@@ -111,6 +111,70 @@ public class Pawn extends Piece
         if(x - 1 >= 0 && board[x-1][y+direction] != null && board[x-1][y+direction].get_color() != this.get_color()) arr.add(Piece.int_to_file(x-1) + "" + Piece.int_to_rank(y+direction));
         if(x + 1 < 8 && board[x+1][y+direction] != null && board[x+1][y+direction].get_color() != this.get_color()) arr.add(Piece.int_to_file(x+1) + "" + Piece.int_to_rank(y+direction));
         
+        //remove invalid moves that would cause check
+        for(int i = 0; i < arr.size(); i++)
+        {
+            if(!this.test_move(board, arr.get(i))) 
+            {
+                arr.remove(i);
+                i--;
+            }
+        }
+
+        return arr;
+    }
+
+    public ArrayList<String> valid_moves_no_test(Piece[][] board)
+    {
+        ArrayList<String> arr = new ArrayList<String>();
+
+        int direction;
+        int x = super.get_col(); //column, file
+        int y = super.get_row(); //row, rank
+
+        if(this.get_color() == Player.black) //black
+        {
+            direction = 1;
+            if(y == 4) //en passant
+            {
+                if(x - 1 >= 0 && board[x-1][y] != null && board[x-1][y].get_type() == PieceType.WP)
+                {
+                    if(((Pawn) board[x-1][y]).double_moved) arr.add(Piece.int_to_file(x-1) + "" + Piece.int_to_rank(y+direction));
+                }
+
+                if(x + 1 < 8 && board[x+1][y] != null && board[x+1][y].get_type() == PieceType.WP)
+                {
+                    if(((Pawn) board[x+1][y]).double_moved) arr.add(Piece.int_to_file(x+1) + "" + Piece.int_to_rank(y+direction));
+                }
+            }
+        }
+
+        else //white 
+        {
+            direction = -1;
+
+            if(y == 3) //en passant
+            {
+                if(x - 1 >= 0 && board[x-1][y] != null && board[x-1][y].get_type() == PieceType.BP)
+                {
+                    if(((Pawn) board[x-1][y]).double_moved) arr.add(Piece.int_to_file(x-1) + "" + Piece.int_to_rank(y+direction));
+                }
+
+                if(x + 1 < 8 && board[x+1][y] != null && board[x+1][y].get_type() == PieceType.BP)
+                {
+                    if(((Pawn) board[x+1][y]).double_moved) arr.add(Piece.int_to_file(x+1) + "" + Piece.int_to_rank(y+direction));
+                }
+            }
+        }
+
+        //move one or two (if not moved) squares forward
+        if(board[x][y+direction] == null) arr.add(Piece.int_to_file(x) + "" + Piece.int_to_rank(y+direction)); 
+        if(!moved && board[x][y+direction] == null && board[x][y+(2*direction)] == null) arr.add(Piece.int_to_file(x) + "" + Piece.int_to_rank(y+(2*direction))); 
+        
+        //capture diagonally
+        if(x - 1 >= 0 && board[x-1][y+direction] != null && board[x-1][y+direction].get_color() != this.get_color()) arr.add(Piece.int_to_file(x-1) + "" + Piece.int_to_rank(y+direction));
+        if(x + 1 < 8 && board[x+1][y+direction] != null && board[x+1][y+direction].get_color() != this.get_color()) arr.add(Piece.int_to_file(x+1) + "" + Piece.int_to_rank(y+direction));
+
         return arr;
     }
 }
