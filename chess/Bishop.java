@@ -2,10 +2,21 @@ package chess;
 
 import java.util.ArrayList;
 
+import chess.Chess.Player;
+import chess.ReturnPiece.PieceFile;
+import chess.ReturnPiece.PieceType;
+
 public class Bishop extends Piece {
 
-    public Bishop(ReturnPiece.PieceFile file, int rank, boolean isWhite) {
-        super(isWhite ? ReturnPiece.PieceType.WB : ReturnPiece.PieceType.BB, file, rank);
+    public Bishop(Player color, PieceFile file, int rank)
+    {
+        super(type(color), file, rank);
+    }
+
+    private static PieceType type(Player color)
+    {
+        if(color == Player.black) return PieceType.BB;
+        else return PieceType.WB;
     }
 
     @Override

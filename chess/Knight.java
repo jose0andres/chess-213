@@ -1,11 +1,21 @@
 package chess;
 
 import java.util.ArrayList;
+import chess.Chess.Player;
+import chess.ReturnPiece.PieceFile;
+import chess.ReturnPiece.PieceType;
 
 public class Knight extends Piece {
 
-    public Knight(ReturnPiece.PieceFile file, int rank, boolean isWhite) {
-        super(isWhite ? ReturnPiece.PieceType.WN : ReturnPiece.PieceType.BN, file, rank);
+    public Knight(Player color, PieceFile file, int rank)
+    {
+        super(type(color), file, rank);
+    }
+
+    private static PieceType type(Player color)
+    {
+        if(color == Player.black) return PieceType.BN;
+        else return PieceType.WN;
     }
 
     @Override
