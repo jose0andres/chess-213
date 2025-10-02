@@ -52,6 +52,10 @@ public class King extends Piece
         } 
     }
 
+    public boolean in_check(Piece[][] board)
+    {
+        return false;
+    }
 
     public ArrayList<String> valid_moves(Piece[][] board) 
     {

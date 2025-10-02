@@ -19,7 +19,8 @@ public abstract class Piece
     // returns locations the piece can move to (ex. "e4", "h6")
     public abstract ArrayList<String> valid_moves(Piece[][] board); 
 
-
+    //tests each item in moves to see if it doesn't cause check, removes invalid moves from moves
+    public abstract void test_moves(Piece[][] board, ArrayList<String> moves);
 
     //Does NOT check if the move is valid
     public void move(Piece[][] board, String newPos)

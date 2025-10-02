@@ -46,8 +46,9 @@ public class Chess
 		{
 			for(int f = 0; f < 8; f++)
 			{
-				if(r == 1); // pawns
-				if(r > 1 && r < 7) board[r][f] = null;
+				if(r == 1) board[r][f] = new Pawn(Player.black, Piece.int_to_file(f), Piece.int_to_rank(r)); // black pawns
+				else if(r == 6) board[r][f] = new Pawn(Player.white, Piece.int_to_file(f), Piece.int_to_rank(r)); // white pawns
+				else if(r > 1 && r < 6) board[r][f] = null;
 			}
 		}
 	}
