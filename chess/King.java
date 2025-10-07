@@ -54,6 +54,22 @@ public class King extends Piece
 
     public boolean in_check(Piece[][] board)
     {
+        for(int r = 0; r < 8; r++)
+        {
+            for(int c = 0; c < 8; c++)
+            {
+                if(board[c][r] != null && board[c][r].get_color() != this.get_color())
+                {
+                    ArrayList<String> moves = board[c][r].valid_moves_no_test(board);
+                    String kingPos = Piece.int_to_file(this.get_col()) + "" + Piece.int_to_rank(this.get_row());
+                    for(int i = 0; i < moves.size(); i++)
+                    {
+                        if(moves.get(i).equals(kingPos)) return true;
+                    }
+                }
+            }
+        }
+        
         return false;
     }
 
@@ -159,7 +175,7 @@ public class King extends Piece
                 }
             }
         }
-        
+
         return arr;
     }
 }
