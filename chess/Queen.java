@@ -1,197 +1,31 @@
 package chess;
 
 import java.util.ArrayList;
-
-import chess.ReturnPiece.PieceFile;
 import chess.ReturnPiece.PieceType;
 import chess.Chess.Player;
 
-public class Queen extends Piece
-{
-
-    public Queen(Player color, PieceFile file, int rank)
-    {
-        super(type(color), file, rank);
+public class Queen extends Piece {
+    public Queen(Player color, int row, int col) {
+        super(color,row,col); 
     }
-
-    private static PieceType type(Player color)
-    {
-        if(color == Player.black) return PieceType.BQ;
-        else return PieceType.WQ;
-    }
-
-
-    public ArrayList<String> valid_moves(Piece[][] board) 
-    {
-        int x = this.get_col(); //column, file
-        int y = this.get_row(); //row, rank
-
-        ArrayList<String> arr = new ArrayList<String>();
-
-        int c = 1;
-        boolean straight = true, ldiag = true, rdiag = true; 
-        for(int r = y - 1; r >= 0 && (straight || ldiag || rdiag); r--)
-        {
-            //Straight up 
-            if(straight)
-            {
-                if(board[x][r] == null) arr.add(Piece.int_to_file(x) + "" + Piece.int_to_rank(r));
-                else
-                {
-                    if(board[x][r].get_color() != this.get_color()) arr.add(Piece.int_to_file(x) + "" + Piece.int_to_rank(r));
-                    straight = false;
-                }
-            }
-
-            //Left, Up Diag
-            if(ldiag)
-            {
-                if(x - c >= 0 && board[x-c][r] == null) arr.add(Piece.int_to_file(x-c) + "" + Piece.int_to_rank(r));
-                else if(x - c >= 0)
-                {
-                    if(board[x-c][r].get_color() != this.get_color()) arr.add(Piece.int_to_file(x-c) + "" + Piece.int_to_rank(r));
-                    ldiag = false;
-                }
-            }
-
-            //Right, Up Diag
-            if(rdiag)
-            {
-                if(x + c < 8 && board[x+c][r] == null) arr.add(Piece.int_to_file(x+c) + "" + Piece.int_to_rank(r));
-                else if(x + c < 8)
-                {
-                    if(board[x+c][r].get_color() != this.get_color()) arr.add(Piece.int_to_file(x+c) + "" + Piece.int_to_rank(r));
-                    rdiag = false;
-                }
-            }
-
-            c++;
-        }
-
-        c = 1;
-        straight = true; ldiag = true; rdiag = true; 
-        for(int r = y + 1; r < 8 && (straight || ldiag || rdiag); r++)
-        {
-            //Straight down 
-            if(straight)
-            {
-                if(board[x][r] == null) arr.add(Piece.int_to_file(x) + "" + Piece.int_to_rank(r));
-                else
-                {
-                    if(board[x][r].get_color() != this.get_color()) arr.add(Piece.int_to_file(x) + "" + Piece.int_to_rank(r));
-                    straight = false;
-                }
-            }
-
-            //Left, Down Diag
-            if(ldiag)
-            {
-                if(x - c >= 0 && board[x-c][r] == null) arr.add(Piece.int_to_file(x-c) + "" + Piece.int_to_rank(r));
-                else if(x - c >= 0)
-                {
-                    if(board[x-c][r].get_color() != this.get_color()) arr.add(Piece.int_to_file(x-c) + "" + Piece.int_to_rank(r));
-                    ldiag = false;
-                }
-            }
-
-            //Right, Down Diag
-            if(rdiag)
-            {
-                if(x + c < 8 && board[x+c][r] == null) arr.add(Piece.int_to_file(x+c) + "" + Piece.int_to_rank(r));
-                else if(x + c < 8)
-                {
-                    if(board[x+c][r].get_color() != this.get_color()) arr.add(Piece.int_to_file(x+c) + "" + Piece.int_to_rank(r));
-                    rdiag = false;
-                }
-            }
-
-            c++;
-        }
-
-        for(c = x - 1; c >= 0; c--) //left
-        {
-            if(board[c][y] == null) arr.add(Piece.int_to_file(c) + "" + Piece.int_to_rank(y));
-            else 
-            {
-                if(board[c][y].get_color() != this.get_color()) arr.add(Piece.int_to_file(c) + "" + Piece.int_to_rank(y));
-                break;
-            }
-        }
-
-        for(c = x + 1; c < 8; c++) //right
-        {
-            if(board[c][y] == null) arr.add(Piece.int_to_file(c) + "" + Piece.int_to_rank(y));
-            else 
-            {
-                if(board[c][y].get_color() != this.get_color()) arr.add(Piece.int_to_file(c) + "" + Piece.int_to_rank(y));
-                break;
-            }
-        }
-
-        for(int i = 0; i < arr.size(); i++)
-        {
-            if(!this.test_move(board, arr.get(i))) 
-            {
-                arr.remove(i);
-                i--;
-            }
-        }
-
-        return arr;
-    }
-    
-
-    public ArrayList<String> valid_moves(Piece[][] board) 
-    {
-        int r = get_row(); 
-        int c = get_col(); 
-
-        ArrayList<String> arr = new ArrayList<String>();
-
-        // scan in 4 orthogonal directions
-        scanRay(board, r, c, +1,  0, arr); // down rows
-        scanRay(board, r, c, -1,  0, arr); // up rows
-        scanRay(board, r, c,  0, +1, arr); // right cols
-        scanRay(board, r, c,  0, -1, arr); // left cols
-
-        // scan in 4 diagonal directions
-        scanRay(board, r, c, +1,  +1, arr); // down, to right
-        scanRay(board, r, c, -1,  +1, arr); // up, to the right
-        scanRay(board, r, c,  +1, -1, arr); // down, to the left
-        scanRay(board, r, c,  -1, -1, arr); // up, to the left
-
-        for(int i = 0; i < arr.size(); i++)
-        {
-            if(!this.test_move(board, arr.get(i))) 
-            {
-                arr.remove(i);
-                i--;
-            }
-        }
-
-        return arr;
-    } 
 
     @Override
-    public ArrayList<String> valid_moves_no_test(Piece[][] board) 
-    {
-        int r = get_row(); 
-        int c = get_col(); 
+    public PieceType getType() {
+        return (color==Player.white) ? PieceType.WQ : PieceType.BQ;
+    }
 
-        ArrayList<String> arr = new ArrayList<String>();
-
-        // scan in 4 orthogonal directions
-        scanRay(board, r, c, +1,  0, arr); // down rows
-        scanRay(board, r, c, -1,  0, arr); // up rows
-        scanRay(board, r, c,  0, +1, arr); // right cols
-        scanRay(board, r, c,  0, -1, arr); // left cols
-
-        // scan in 4 diagonal directions
-        scanRay(board, r, c, +1,  +1, arr); // down, to right
-        scanRay(board, r, c, -1,  +1, arr); // up, to the right
-        scanRay(board, r, c,  +1, -1, arr); // down, to the left
-        scanRay(board, r, c,  -1, -1, arr); // up, to the left
-
-        return arr;
-    } 
+    @Override
+    public ArrayList<int[]> valid_moves_no_test(Piece[][] board) {
+        //move in any direction//
+        ArrayList<int[]> m = new ArrayList<>();
+        addRay(board,color,row,col,1,0,m);
+        addRay(board,color,row,col,-1,0,m);
+        addRay(board,color,row,col,0,1,m);
+        addRay(board,color,row,col,0,-1,m);
+        addRay(board,color,row,col,1,1,m);
+        addRay(board,color,row,col,1,-1,m);
+        addRay(board,color,row,col,-1,1,m);
+        addRay(board,color,row,col,-1,-1,m);
+        return m;
+    }
 }

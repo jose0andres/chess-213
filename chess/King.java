@@ -3,179 +3,108 @@ package chess;
 import java.util.ArrayList;
 
 import chess.Chess.Player;
-import chess.ReturnPiece.PieceFile;
 import chess.ReturnPiece.PieceType;
 
-public class King extends Piece
-{
-
-    boolean moved = false; //for castling
-
-    public King(Player color, PieceFile file, int rank)
-    {
-        super(type(color), file, rank);
+public class King extends Piece {
+    //disable castling after king moves//
+    public boolean moved = false;
+    public King(Player color, int row, int col) {
+        super(color, row, col);
     }
 
-    private static PieceType type(Player color)
-    {
-        if(color == Player.black) return PieceType.BK;
-        else return PieceType.WK;
+    @Override
+    public PieceType getType() {
+        return (color == Player.white) ? PieceType.WK : PieceType.BK;
     }
 
-    @Override 
-    public void move(Piece[][] board, String newPos)
-    {
-        int x = super.get_col();
-        int y = super.get_row();
+    //only moves possible are 8 squares around king//
+    @Override
+    public ArrayList<int[]> valid_moves_no_test(Piece[][] board) {
         
-        super.move(board, newPos);
+        ArrayList<int[]> moves = new ArrayList<>();
+        
+        final int r = this.row;
+        final int c = this.col;
+        final int[] DR = {-1,-1,-1, 0, 0, 1, 1, 1};
+        final int[] DC = {-1, 0, 1,-1, 1,-1, 0, 1};
 
-        int newx = super.get_col();
+        for (int i = 0; i < 8; i++) {
 
-        if(!moved)
-        {
-            moved = true;
-
-            // move rook while castling 
-            if(super.get_color() == Player.black)
-            {
-                if(newx == (x + 2)) board[y][x+3].move(board, "f8"); // black king side castle
-                else if(newx == (x - 3)) board[y][x-4].move(board, "c8"); // black queen side castle
+            int nr = r + DR[i], nc = c + DC[i];
+            if (!inside(nr, nc)) continue;
+            Piece at = board[nr][nc];
+            if (at == null || at.color != this.color) {
+                moves.add(new int[]{nr, nc});
             }
-
-            else 
-            {
-                if(newx == (x + 2)) board[y][x+3].move(board, "f1"); // white king side castle
-                else if(newx == (x - 3)) board[y][x-4].move(board, "c1"); // white queen side castle
-            }
-
-        } 
+        }
+        return moves;
     }
 
-    public boolean in_check(Piece[][] board)
-    {
-        for(int r = 0; r < 8; r++)
-        {
-            for(int c = 0; c < 8; c++)
-            {
-                if(board[c][r] != null && board[c][r].get_color() != this.get_color())
-                {
-                    ArrayList<String> moves = board[c][r].valid_moves_no_test(board);
-                    String kingPos = Piece.int_to_file(this.get_col()) + "" + Piece.int_to_rank(this.get_row());
-                    for(int i = 0; i < moves.size(); i++)
-                    {
-                        if(moves.get(i).equals(kingPos)) return true;
+    @Override
+    public ArrayList<int[]> valid_moves(Piece[][] board) {
+        
+        ArrayList<int[]> legal = new ArrayList<>();
+
+        final int kr = this.row;
+        final int kc = this.col;
+
+        for (int[] to : valid_moves_no_test(board)) {
+            if (test_move(board, to[0], to[1])) {
+                legal.add(new int[]{to[0], to[1]});
+            }
+        }
+
+        final Chess.Player me  = this.color;
+        final Chess.Player opp = (me == Chess.Player.white) ? Chess.Player.black : Chess.Player.white;
+        boolean inCheckNow = Chess.squareAttacked(board, (char)('a' + kc), 8 - kr, opp);
+            
+        //no castling if in check now//
+        if (inCheckNow) {
+                return legal; 
+            }
+            boolean kingOnStart = (color == Player.white && kr == 7 && kc == 4) || (color == Player.black && kr == 0 && kc == 4);
+        
+            if (kingOnStart && !this.moved) {
+                //kingside castling//
+                if (pathEmpty(board, kr, kc+1, kc+2)) {
+
+                Piece rook = board[kr][7];
+
+                if (rook instanceof Rook && rook.color == this.color && !((Rook)rook).moved) {
+                    if (test_move(board, kr, kc+1) && test_move(board, kr, kc+2)) {
+                        
+                        legal.add(new int[]{kr, kc+2});
                     }
                 }
             }
+            //queenside castling//
+            if (pathEmpty(board, kr, kc-1, kc-2, kc-3)) {
+
+                Piece rook = board[kr][0];
+                
+                if (rook instanceof Rook && rook.color == this.color && !((Rook)rook).moved) {
+                    if (test_move(board, kr, kc-1) && test_move(board, kr, kc-2)) {
+                        
+                        legal.add(new int[]{kr, kc-2});
+                    }
+                }
+            }
+        }
+
+        return legal;
+    }
+
+    private static boolean inside(int r, int c) {
+        return r >= 0 && r < 8 && c >= 0 && c < 8;
+    }
+
+    private static boolean pathEmpty(Piece[][] board, int row, int... cols) {
+        for (int c : cols) {
+            
+            if (c < 0 || c >= 8) return false;
+            if (board[row][c] != null) return false;
         }
         
-        return false;
-    }
-
-    public ArrayList<String> valid_moves(Piece[][] board) 
-    {
-        int x = this.get_col(); //column, file
-        int y = this.get_row(); //row, rank
-
-        ArrayList<String> arr = new ArrayList<String>();
-
-        //add surrounding squares
-        for(int r = y - 1; r <= y + 1; r++)
-        {
-            for(int c = x - 1; c <= x + 1; c++)
-            {
-                if(r >= 0 && r < 8 && c >= 0 && c < 8)
-                {
-                    if(!(r == y && c == x)) //not the same spot
-                    {
-                        if(board[c][r] == null) arr.add(Piece.int_to_file(c) + "" + Piece.int_to_rank(r));
-                        else if(board[c][r].get_color() != this.get_color()) arr.add(Piece.int_to_file(c) + "" + Piece.int_to_rank(r));
-                    }
-                }
-            }
-        }
-
-        //castling
-        if(!moved)
-        {
-            //king side
-            if(board[x+3][y] != null && (board[x+3][y].get_type() == PieceType.BR || board[x+3][y].get_type() == PieceType.WR))
-            {
-                if(!((Rook) board[x+3][y]).moved)
-                {
-                    if(board[x+1][y] == null && board[x+2][y] == null) arr.add(Piece.int_to_file(x+2) + "" + Piece.int_to_rank(y));
-                }
-            }
-
-            //queen side
-            if(board[x-4][y] != null && (board[x-4][y].get_type() == PieceType.BR || board[x-4][y].get_type() == PieceType.WR))
-            {
-                if(!((Rook) board[x-4][y]).moved)
-                {
-                    if(board[x-1][y] == null && board[x-2][y] == null && board[x-3][y] == null) arr.add(Piece.int_to_file(x-2) + "" + Piece.int_to_rank(y));
-                }
-            }
-        }
-
-        //remove invalid moves that would cause check
-        for(int i = 0; i < arr.size(); i++)
-        {
-            if(!this.test_move(board, arr.get(i))) 
-            {
-                arr.remove(i);
-                i--;
-            }
-        }
-
-        return arr;
-    }
-
-    public ArrayList<String> valid_moves_no_test(Piece[][] board) 
-    {
-        int x = this.get_col(); //column, file
-        int y = this.get_row(); //row, rank
-
-        ArrayList<String> arr = new ArrayList<String>();
-
-        //add surrounding squares
-        for(int r = y - 1; r <= y + 1; r++)
-        {
-            for(int c = x - 1; c <= x + 1; c++)
-            {
-                if(r >= 0 && r < 8 && c >= 0 && c < 8)
-                {
-                    if(!(r == y && c == x)) //not the same spot
-                    {
-                        if(board[c][r] == null) arr.add(Piece.int_to_file(c) + "" + Piece.int_to_rank(r));
-                        else if(board[c][r].get_color() != this.get_color()) arr.add(Piece.int_to_file(c) + "" + Piece.int_to_rank(r));
-                    }
-                }
-            }
-        }
-
-        //castling
-        if(!moved)
-        {
-            //king side
-            if(board[x+3][y] != null && (board[x+3][y].get_type() == PieceType.BR || board[x+3][y].get_type() == PieceType.WR))
-            {
-                if(!((Rook) board[x+3][y]).moved)
-                {
-                    if(board[x+1][y] == null && board[x+2][y] == null) arr.add(Piece.int_to_file(x+2) + "" + Piece.int_to_rank(y));
-                }
-            }
-
-            //queen side
-            if(board[x-4][y] != null && (board[x-4][y].get_type() == PieceType.BR || board[x-4][y].get_type() == PieceType.WR))
-            {
-                if(!((Rook) board[x-4][y]).moved)
-                {
-                    if(board[x-1][y] == null && board[x-2][y] == null && board[x-3][y] == null) arr.add(Piece.int_to_file(x-2) + "" + Piece.int_to_rank(y));
-                }
-            }
-        }
-
-        return arr;
+        return true;
     }
 }
