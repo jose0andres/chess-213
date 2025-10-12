@@ -2,7 +2,8 @@ package chess;
 
 import java.util.ArrayList;
 
-import chess.ReturnPiece.*;
+import chess.ReturnPiece.PieceFile;
+import chess.ReturnPiece.PieceType;
 import chess.Chess.Player;
 
 public class Queen extends Piece
@@ -19,7 +20,7 @@ public class Queen extends Piece
         else return PieceType.WQ;
     }
 
-    /*
+
     public ArrayList<String> valid_moves(Piece[][] board) 
     {
         int x = this.get_col(); //column, file
@@ -138,7 +139,7 @@ public class Queen extends Piece
 
         return arr;
     }
-    */
+    
 
     public ArrayList<String> valid_moves(Piece[][] board) 
     {

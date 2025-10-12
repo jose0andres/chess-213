@@ -15,156 +15,132 @@ public abstract class Piece
         retpiece.pieceFile = file;
         retpiece.pieceRank = rank;
     }
-    
-    // returns locations the piece can move to (ex. "e4", "h6")
-    public abstract ArrayList<String> valid_moves(Piece[][] board); 
+
+    // ---------- Public API expected by the project ----------
+
+    /** Generate legal moves for this piece, filtering out moves that leave own king in check. */
+    public ArrayList<String> valid_moves(Piece[][] board)
+    {
+        ArrayList<String> pseudo = valid_moves_no_test(board);
+        ArrayList<String> legal = new ArrayList<>();
+        for (String sq : pseudo) {
+            int[] rc = parseSquare(sq);
+            if (rc != null && test_move(board, rc[0], rc[1])) {
+                legal.add(sq);
+            }
+        }
+        return legal;
+    }
+
+    /** Generate all moves for the piece ignoring self-check (pseudo-legal). */
     public abstract ArrayList<String> valid_moves_no_test(Piece[][] board);
 
-    //returns true if the move is valid (does not cause check)
-    //returns false if the move is invalid (does cause check
-    public boolean test_move(Piece[][] board, String move)
+    /**
+     * Simulate moving this piece to (toRow, toCol). Return true if the position
+     * after the move does NOT have our own king in check.
+     */
+    public boolean test_move(Piece[][] board, int toRow, int toCol)
     {
-        return false; // to be implemented by Jose
+        int fromRow = get_row();
+        int fromCol = get_col();
+
+        // Bounds check
+        if (toRow < 0 || toRow >= 8 || toCol < 0 || toCol >= 8) return false;
+
+        Piece moving = this;
+        Piece captured = board[toRow][toCol];
+
+        // Apply move on board
+        board[fromRow][fromCol] = null;
+        board[toRow][toCol] = moving;
+
+        // Save old coords to restore
+        PieceFile oldFile = moving.retpiece.pieceFile;
+        int oldRank = moving.retpiece.pieceRank;
+
+        // Update the piece's internal coordinates
+        moving.retpiece.pieceFile = int_to_file(toCol);
+        moving.retpiece.pieceRank = int_to_rank(toRow);
+
+        boolean meIsWhite = isWhite(moving.retpiece.pieceType);
+        Player me = meIsWhite ? Player.white : Player.black;
+
+        boolean inCheck = isKingInCheck(board, me);
+
+        // Undo move
+        board[toRow][toCol] = captured;
+        board[fromRow][fromCol] = moving;
+        moving.retpiece.pieceFile = oldFile;
+        moving.retpiece.pieceRank = oldRank;
+
+        return !inCheck;
     }
 
-    //Does NOT check if the move is valid
-    public void move(Piece[][] board, String newPos)
+    // ---------- Check detection helpers (no recursion on valid_moves) ----------
+
+    /** Returns true if the specified side's king is attacked in the current board. */
+    protected boolean isKingInCheck(Piece[][] board, Player side)
     {
-        int x = this.get_col();
-        int y = this.get_row();
-
-        board[x][y] = null;
-
-        retpiece.pieceRank = Integer.parseInt("" + newPos.charAt(1));
-
-        switch(newPos.charAt(0))
-        {
-            case 'a':
-                retpiece.pieceFile = PieceFile.a;
-                break;
-            case 'b':
-                retpiece.pieceFile = PieceFile.b;
-                break;
-            case 'c':
-                retpiece.pieceFile = PieceFile.c;
-                break;
-            case 'd':
-                retpiece.pieceFile = PieceFile.d;
-                break;
-            case 'e':
-                retpiece.pieceFile = PieceFile.e;
-                break;
-            case 'f':
-                retpiece.pieceFile = PieceFile.f;
-                break;
-            case 'g':
-                retpiece.pieceFile = PieceFile.g;
-                break;
-            case 'h':
-                retpiece.pieceFile = PieceFile.h;
-                break;
+        int kingRow = -1, kingCol = -1;
+        // Locate the king
+        for (int r = 0; r < 8; r++) {
+            for (int c = 0; c < 8; c++) {
+                Piece p = board[r][c];
+                if (p == null) continue;
+                if ((side == Player.white && p.retpiece.pieceType == PieceType.WK) ||
+                    (side == Player.black && p.retpiece.pieceType == PieceType.BK)) {
+                    kingRow = r; kingCol = c;
+                    break;
+                }
+            }
         }
+        if (kingRow == -1) return false; // should not happen
 
-        x = this.get_col();
-        y = this.get_row();
-
-        board[x][y] = this;
-    }
-
-    public ReturnPiece get_piece()
-    {
-        return retpiece;
-    }
-
-    public PieceType get_type()
-    {
-        return retpiece.pieceType;
-    }
-
-    public Player get_color()
-    {
-        switch(retpiece.pieceType)
-        {
-            //WP, WR, WN, WB, WQ, WK,  BP, BR, BN, BB, BK, BQ
-            case WP:
-            case WR:
-            case WN:
-            case WB:
-            case WQ:
-            case WK:
-                return Player.white;
-            case BP:
-            case BR:
-            case BN:
-            case BB:
-            case BQ:
-            case BK:
-                return Player.black;
-            default:
-                return null;         
+        String kingSq = square(kingCol, kingRow);
+        // Scan opponent moves (pseudo-legal only!)
+        for (int r = 0; r < 8; r++) {
+            for (int c = 0; c < 8; c++) {
+                Piece p = board[r][c];
+                if (p == null) continue;
+                boolean white = isWhite(p.retpiece.pieceType);
+                if ((side == Player.white && white) || (side == Player.black && !white)) continue;
+                ArrayList<String> attacks = p.valid_moves_no_test(board);
+                for (String s : attacks) {
+                    if (s.equals(kingSq)) return true;
+                }
+            }
         }
+        return false;
     }
 
-    // get 2d-arr coordinates from retpiece
-    public int get_row()
+    // ---------- Coordinates & utilities ----------
+
+    public static PieceFile int_to_file(int x) //x is column [0..7]
     {
-        return 8 - retpiece.pieceRank;
+        if(x == 0) return PieceFile.a;
+        else if(x == 1) return PieceFile.b;
+        else if(x == 2) return PieceFile.c;
+        else if(x == 3) return PieceFile.d;
+        else if(x == 4) return PieceFile.e;
+        else if(x == 5) return PieceFile.f;
+        else if(x == 6) return PieceFile.g;
+        else return PieceFile.h;
     }
 
-    public int get_col()
+    public static int int_to_rank(int y) //y is row index [0..7] -> rank [1..8]
+    {
+        return y + 1;
+    }
+
+    public int get_row()  // returns 0..7
+    {
+        return retpiece.pieceRank - 1;
+    }
+
+    public int get_col()  // returns 0..7
     {
         return retpiece.pieceFile.ordinal();
     }
-
-    public int get_rank()
-    {
-        return retpiece.pieceRank;
-    }
-
-    public PieceFile get_file()
-    {
-        return retpiece.pieceFile;
-    }
-
-    //converts from coordinate to PieceFile/rank accordingly
-    public static PieceFile int_to_file(int x)
-    {
-        switch(x)
-        {
-            case 0: return PieceFile.a;
-            case 1: return PieceFile.b;
-            case 2: return PieceFile.c;
-            case 3: return PieceFile.d;
-            case 4: return PieceFile.e;
-            case 5: return PieceFile.f;
-            case 6: return PieceFile.g;
-            case 7: return PieceFile.h;
-            default: return null;
-        }
-    }
-
-    public static int int_to_rank(int x)
-    {
-        return 8 - x;
-    }
-
-
-    protected void scanRay(Piece[][] board, int r, int c, int dr, int dc, ArrayList<String> out) {
-    boolean meIsWhite = isWhite(this.retpiece.pieceType);
-    int nr = r + dr, nc = c + dc;
-
-    while (0 <= nr && nr < 8 && 0 <= nc && nc < 8) {
-        Piece at = board[nr][nc];
-        if (at == null) {
-            out.add(square(nc, nr));
-        } else {
-            boolean themIsWhite = isWhite(at.retpiece.pieceType);
-            if (themIsWhite != meIsWhite) out.add(square(nc, nr));
-            break; // blocked either way
-        }
-        nr += dr; nc += dc;
-    }
-}
 
     protected boolean isWhite(ReturnPiece.PieceType t) {
         return t == ReturnPiece.PieceType.WP || t == ReturnPiece.PieceType.WR ||
@@ -174,5 +150,21 @@ public abstract class Piece
 
     protected String square(int col, int row) {
         return String.valueOf(int_to_file(col)) + int_to_rank(row);
+    }
+
+    /** Parse squares like "e4" into (row,col). Returns null if invalid. */
+    protected int[] parseSquare(String sq) {
+        if (sq == null || sq.length() < 2) return null;
+        char file = sq.charAt(0);
+        int col = file - 'a';
+        int rank;
+        try {
+            rank = Integer.parseInt(sq.substring(1));
+        } catch (NumberFormatException e) {
+            return null;
+        }
+        int row = rank - 1;
+        if (col < 0 || col > 7 || row < 0 || row > 7) return null;
+        return new int[]{row, col};
     }
 }
